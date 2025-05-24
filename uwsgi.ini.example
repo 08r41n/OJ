@@ -1,0 +1,34 @@
+[uwsgi]
+# Socket and pid file location/permission.
+
+uwsgi-socket = /home/viet/puoj/site/tmp/dmoj-site.sock
+chmod-socket = 666
+pidfile = /home/viet/puoj/site/tmp/dmoj-site.pid
+# Bạn nên chạy uwsgi bằng tài khoản riêng cho dmoj, ở đây là user "aaa".
+uid = viet
+gid = viet
+
+# Paths.
+chdir = /home/viet/puoj/site
+pythonpath = /home/viet/puoj/site
+virtualenv = /home/viet/puoj/vnojsite
+home = /home/viet/puoj/vnojsite
+
+# DMOJ app settings.
+protocol = uwsgi
+master = true
+env = DJANGO_SETTINGS_MODULE=dmoj.settings
+module = dmoj.wsgi:application
+optimize = 2
+
+# Scaling.
+memory-report = true
+cheaper-algo = backlog
+cheaper = 3
+cheaper-initial = 5
+cheaper-step = 1
+cheaper-rss-limit-soft = 201326592
+cheaper-rss-limit-hard = 234881024
+workers = 7
+
+env = DJANGO_SETTINGS_MODULE=dmoj.settings
