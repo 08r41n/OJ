@@ -10,15 +10,27 @@
 # SECURITY WARNING: keep the secret key used in production secret!
 # You may use this command to generate a key:
 # python3 -c 'from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())'
-SECRET_KEY = 'diow=&wyt1&@#5j8f92x(f2f763x9-&0to%^xrpghv8y_)dl7k'
-#CHAT_SECRET_KEY = 'Qxf4eZAN6yzshMzvEMwQiES4q87A4FKvXkcfZEBDOJg='
+SECRET_KEY = 'LurlH6AU5powkz5afnfuml5euXF3BeGUKZ31QzGBvutRS74pPiSsrWwOA'
+SEB_BROWSER_KEYS = [
+    'abc1234abc1234abc1234abc1234abc1234abc1234abc1234abc1234abc1234',  # Mac
+    'def5678def5678def5678def5678def5678def5678def5678def5678def5678',  # Windows
+]
+JUDGE_SERVER_BIND = '0.0.0.0'
+JUDGE_SERVER_PORT = 9999
+JUDGE_AUTHENTICATION_KEY = 'LurlH6AU5powkz5afnfuml5euXF3BeGUKZ31QzGBvutRS74pPiSsrWwOA'
+JUDGE_SERVERS = {
+    'judge1': {
+        'key': 'LurlH6AU5powkz5afnfuml5euXF3BeGUKZ31QzGBvutRS74pPiSsrWwOA',
+        'address': 'BRIDGED_JUDGE_ADDRESS',  # hoặc IP của judge nếu chạy riêng container
+    },
+}
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False  # Change to False once you are done with runserver testing.
 
 # Uncomment and set to the domain names this site is intended to serve.
 # You must do this once you set DEBUG to False.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['192.168.10.28', 'localhost', '127.0.0.1']
 
 # Optional apps that DMOJ can make use of.
 INSTALLED_APPS += (
@@ -43,7 +55,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dmoj',
         'USER': 'dmoj',
-        'PASSWORD': 'root',
+        'PASSWORD': '<123456>',
         'HOST': '127.0.0.1',
         'OPTIONS': {
             'charset': 'utf8mb4',
@@ -88,7 +100,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # The following block is included for your convenience, if you want
 # to use Gmail.
-SEND_ACTIVATION_EMAIL = False
 #EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_USE_TLS = True
 #EMAIL_HOST = 'smtp.gmail.com'
@@ -128,9 +139,8 @@ SERVER_EMAIL = 'no.reply.thqn@gmail.com'
 # webserver to serve the static files. This is the directory where all the
 # static files DMOJ uses will be collected to.
 # You must configure your webserver to serve this directory as /static/ in production.
-import os
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+COMPRESS_ROOT = STATIC_ROOT
 # URL to access static files.
 #STATIC_URL = '/static/'
 
@@ -143,11 +153,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
 ############################################
 
 ## DMOJ site display settings.
-SITE_NAME = 'THQNOJ'
-SITE_FULL_URL = 'http://tinhocquangninh.ddns.net'
-SITE_LONG_NAME = 'THQNOJ: Tin Hoc Quang Ninh Online Judge'
-SITE_ADMIN_EMAIL = 'giang213205@gmail.com'
-TERMS_OF_SERVICE_URL = None  # Use a flatpage.
+SITE_NAME = 'VNOJ'
+SITE_FULL_URL = 'https://oj.vnoi.info'
+SITE_LONG_NAME = 'VNOJ: VNOI Online Judge'
+SITE_ADMIN_EMAIL = 'admin@example.com'
+TERMS_OF_SERVICE_URL = '//oj.vnoi.info/tos/'  # Use a flatpage.
 
 ## Media files settings.
 # This is the directory where all the media files are stored.
@@ -167,7 +177,7 @@ DMOJ_PROBLEM_DATA_ROOT = '/home/aaa/site/problems/'
 BRIDGED_JUDGE_ADDRESS = [('localhost', 9999)]
 
 # The bridged daemon bind address and port to communicate with the site.
-#BRIDGED_DJANGO_ADDRESS = [('localhost', 9998)]
+BRIDGED_DJANGO_ADDRESS = [('localhost', 9998)]
 
 ## DMOJ features.
 # Set to True to enable full-text searching for problems.
@@ -183,7 +193,7 @@ BAD_MAIL_PROVIDERS = set()
 
 ## Event server.
 # Uncomment to enable live updating.
-#EVENT_DAEMON_USE = True
+EVENT_DAEMON_USE = True
 
 # Uncomment this section to use websocket/daemon.js included in the site.
 #EVENT_DAEMON_POST = '<ws:// URL to post to>'
@@ -195,9 +205,6 @@ EVENT_DAEMON_POLL = ('127.0.0.1', 15102)
 
 # These are the publicly accessed interface configurations.
 # They should match those used by the script.
-#EVENT_DAEMON_GET = '<public ws:// URL for clients>'
-#EVENT_DAEMON_GET_SSL = '<public wss:// URL for clients>'
-#EVENT_DAEMON_POLL = '<public URL to access the HTTP long polling of event server>'
 # i.e. the path to /channels/ exposed by the daemon, through whatever proxy setup you have.
 
 # Using our standard nginx configuration, these should be:
