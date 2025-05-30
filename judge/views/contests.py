@@ -1,5 +1,6 @@
 import json
 import os
+import hashlib
 from calendar import Calendar, SUNDAY
 from collections import defaultdict, namedtuple
 from datetime import date, datetime, time, timedelta
