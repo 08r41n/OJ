@@ -231,9 +231,6 @@ function formatCompileLog(log) {
 }
 
 function submitProblem() {
-    if (!confirm("Bạn có chắc chắn muốn nộp bài không?")) {
-        return; // Người dùng chọn "Không"
-    }
 
     // Lấy source code từ editor2 (ACE Editor)
     let sourceCode = editor.getValue(); 
@@ -277,3 +274,20 @@ function submitProblem() {
     document.getElementById("ide_submit_form").action = submitPath;
     document.querySelector("#ide_submit_form button[type='submit']").click();
 }
+
+function overrideJoinConfirm() {
+    const joinButton = document.querySelector('.first-join');
+    if (!joinButton) return;
+
+    $('.first-join').off('click');
+
+    joinButton.addEventListener('click', function (e) {
+        e.preventDefault();                  
+        e.stopImmediatePropagation();       
+        const form = joinButton.closest('form');
+        if (form) form.submit();          
+    }, true); 
+}
+document.addEventListener('DOMContentLoaded', function () {
+    overrideJoinConfirm();
+});
