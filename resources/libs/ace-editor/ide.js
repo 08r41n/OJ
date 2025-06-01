@@ -231,14 +231,9 @@ function formatCompileLog(log) {
 }
 
 function submitProblem() {
-
-    // Lấy source code từ editor2 (ACE Editor)
     let sourceCode = editor.getValue(); 
-
-    // Lấy ngôn ngữ từ dropdown
     var selectedLang = document.getElementById("language").value;
 
-    // Map từ ngôn ngữ IDE sang id ngôn ngữ database
     var languageMap = {
         "c": 5,
         "cpp": 14,
@@ -250,9 +245,8 @@ function submitProblem() {
     };
 
     var backendLanguageId = languageMap[selectedLang];
-
     if (!backendLanguageId) {
-        alert("Ngôn ngữ không hợp lệ!");
+        terminal.value = "Ngôn ngữ không hợp lệ!";
         return;
     }
 
@@ -260,7 +254,6 @@ function submitProblem() {
 
     var ideLanguageSelect = document.getElementById("ide_language");
     ideLanguageSelect.innerHTML = '';
-
     var option = document.createElement("option");
     option.value = backendLanguageId;
     option.selected = true;
@@ -272,21 +265,46 @@ function submitProblem() {
     }
     var submitPath = currentPath + 'submit';
     document.getElementById("ide_submit_form").action = submitPath;
-    document.querySelector("#ide_submit_form button[type='submit']").click();
+    const form = document.getElementById("ide_submit_form");
+    const submitBtn = document.querySelector("#ide_submit_form button[type='submit']");
+    form.submit(); 
 }
 
 function overrideJoinConfirm() {
     const joinButton = document.querySelector('.first-join');
     if (!joinButton) return;
 
+    // Tạo một button mới không có event
+    const newButton = document.createElement('input');
+    newButton.type = 'submit';
+    newButton.className = joinButton.className;
+    newButton.value = joinButton.value;
+
+    // Thay thế nút cũ bằng nút mới
+    joinButton.parentNode.replaceChild(newButton, joinButton);
+
+    // Gắn sự kiện submit trực tiếp không qua confirm
+    newButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        const form = newButton.closest('form');
+        if (form) form.submit();
+    });
+}
+
+function overrideJoinConfirm() {
+    const joinButton = document.querySelector('.first-join');
+    if (!joinButton) return;
+
+    // Gỡ sự kiện jQuery đã gắn trước đó
     $('.first-join').off('click');
 
+    // Gắn lại sự kiện JS thuần
     joinButton.addEventListener('click', function (e) {
-        e.preventDefault();                  
-        e.stopImmediatePropagation();       
+        e.preventDefault();                  // Chặn hành vi mặc định
+        e.stopImmediatePropagation();        // Ngăn các sự kiện khác
         const form = joinButton.closest('form');
-        if (form) form.submit();          
-    }, true); 
+        if (form) form.submit();             // Gửi form luôn
+    }, true); // capture để chạy sớm hơn jQuery nếu vẫn còn
 }
 document.addEventListener('DOMContentLoaded', function () {
     overrideJoinConfirm();
