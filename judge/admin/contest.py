@@ -348,6 +348,7 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
                     'judge_contest_banned_judges',
                     'judge_contest_view_contest_scoreboard',
                     'judge_contest_rate_exclude',
+                    'judge_examaccess',
                 ]
                 
                 with open(sql_filepath, 'w') as f:
@@ -410,6 +411,8 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
                         elif table.startswith('judge_problem_'):
                             condition = f"problem_id IN (SELECT problem_id FROM judge_contestproblem WHERE contest_id={contest_id})"
                         elif table.startswith('judge_contest_'):
+                            condition = f"contest_id={contest_id}"
+                        elif table == 'judge_examaccess': 
                             condition = f"contest_id={contest_id}"
                         else:
                             continue  
