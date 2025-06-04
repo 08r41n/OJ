@@ -270,17 +270,20 @@ function submitProblem() {
 }
 
 function overrideJoinConfirm() {
-    const joinButton = document.querySelector('.first-join');
-    if (!joinButton) return;
+    const joinButtons = document.querySelectorAll('.first-join, .participate-button.join-warning');
+    if (!joinButtons.length) return;
 
-    $('.first-join').off('click');
+    joinButtons.forEach(joinButton => {
+        $(joinButton).off('click');
 
-    joinButton.addEventListener('click', function (e) {
-        e.preventDefault();                  
-        e.stopImmediatePropagation();       
-        const form = joinButton.closest('form');
-        if (form) form.submit();          
-    }, true); 
+        joinButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const form = joinButton.closest('form');
+            if (form) form.submit();
+        }, true);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
