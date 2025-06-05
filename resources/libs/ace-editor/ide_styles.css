@@ -211,7 +211,9 @@ select:hover {
 .ace_wrapper .submit-btn:hover {
     cursor: pointer;
 }
-
+#select2-id_exam_organization-container{ 
+    width: 30em;
+}
 @media (max-width: 767px) {
     #page-container.ide-open{
         display: block;
