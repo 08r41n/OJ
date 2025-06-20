@@ -277,7 +277,7 @@
         {% csrf_token %}
         {{ form.non_field_errors() }}
         <div id="submit-wrapper">
-            <div id="editor" class="hidden">
+            <div id="editor">
                 <div>
                     <label for="file_select"><i>{{ _('Paste your source code here or load it from a file:') }}</i></label>
                     <input id="file_select" type="file" onchange="handleFileSelect()">
