@@ -79,7 +79,7 @@ let input = document.getElementById("input");
 function saveFile() {
     let code = editor.getValue();
     let filename = document.querySelector('.ace_wrapper .file-name').value || "main.c";
-    if (!filename) return; 
+    if (!filename) return;
 
     let blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
     let link = document.createElement('a');
@@ -89,8 +89,6 @@ function saveFile() {
     link.click();
     document.body.removeChild(link);
 }
-
-
 
 function showIde(){
     document.querySelector('.ace_wrapper').style.display = 'block';
@@ -109,8 +107,89 @@ function showIde(){
         const contentRight = document.querySelector('#content-body #content-right');
         if (contentRight) contentRight.classList.add('ide-active');
     }
+    const langMap = {
+        'c': 'c',
+        'c++': 'cpp',
+        'cpp': 'cpp',
+        'cpp20': 'cpp',
+        'java': 'java',
+        'kotlin': 'kotlin',
+        'pascal': 'pascal',
+        'pas': 'pascal',
+        'pypy': 'pypy',
+        'py3': 'python',
+        'python': 'python',
+        'output only': null
+    };
+    const langSelect = document.querySelector('#language');
+    const toggledEl = document.querySelector('#allowed-langs .toggled');
+    if (!toggledEl) {
+        disableEditorAndLangs(langSelect);
+        console.warn('[showIde] allowed-langs not found');
+        return;
+    }
+
+    const allowedLangsRaw = Array.from(toggledEl.childNodes)
+        .filter(node => node.nodeType === Node.TEXT_NODE || (node.tagName !== 'S'))
+        .map(node => node.textContent.trim().toLowerCase())
+        .flatMap(text => text.split(','))
+        .map(lang => lang.trim())
+        .filter(lang => lang);
+      const allowedLangs = allowedLangsRaw
+        .map(name => langMap[name])
+        .filter(Boolean);
+
+    if (!langSelect) {
+        console.warn('[showIde] #language select not found');
+        return;
+    }
+
+    let foundAny = false;
+    Array.from(langSelect.options).forEach(option => {
+        const isAllowed = allowedLangs.includes(option.value);
+        option.style.display = isAllowed ? '' : 'none';
+        if (isAllowed) foundAny = true;
+    });
+
+    if (!foundAny) {
+        disableEditorAndLangs(langSelect);
+        console.warn('[showIde] No valid languages allowed!');
+    } else {
+        const selected = langSelect.options[langSelect.selectedIndex];
+        if (!selected || selected.style.display === 'none') {
+            const firstVisible = Array.from(langSelect.options).find(o => o.style.display !== 'none');
+            if (firstVisible) {
+                // Bỏ selected cũ
+                Array.from(langSelect.options).forEach(o => o.selected = false);
+                firstVisible.selected = true;
+
+                // Cập nhật selectedIndex
+                langSelect.selectedIndex = Array.from(langSelect.options).indexOf(firstVisible);
+            }
+        }
+
+    }
+    let selectedLanguageEditor = document.getElementById("language").value;
+    editor.setValue(languageCodeSamples[selectedLanguageEditor]);
+    editor.clearSelection();
+    if (selectedLanguageEditor == 'c' || selectedLanguageEditor == 'cpp') {
+        editor.session.setMode("ace/mode/c_cpp");
+    } else {
+        editor.session.setMode("ace/mode/" + selectedLanguageEditor);
+    };
 }
 
+function disableEditorAndLangs(langSelect) {
+    editor.setValue('');
+    editor.setReadOnly(true);
+    editor.renderer.$cursorLayer.element.style.display = "none";
+    if (langSelect) {
+        langSelect.selectedIndex = -1;
+        Array.from(langSelect.options).forEach(option => {
+            option.style.display = 'none';
+        });
+    }
+}
 function hideIde(){
     document.querySelector('.ace_wrapper').style.display = 'none';
     document.querySelector('.ide-btn').style.display = 'block';
@@ -131,8 +210,8 @@ function hideIde(){
 }
 
 function runCode() {
-    let code = editor.getValue(); 
-    let inputText = input.value;  
+    let code = editor.getValue();
+    let inputText = input.value;
     const select = document.getElementById('language');
     const languageSelectedText = select.options[select.selectedIndex].text.toUpperCase();
     terminal.value = "Running code...\n";
@@ -140,9 +219,9 @@ function runCode() {
     document.querySelector('.ace_wrapper .submit-btn').classList.add('blur-disabled');
 
     fetch("/problem/run_code", {
-        method: "POST",  
+        method: "POST",
         headers: {
-            "Content-Type": "application/json"  
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             language: languageSelectedText,
@@ -153,10 +232,10 @@ function runCode() {
     .then(response => {
         if (!response.ok) {
             return response.json().then(errorData => {
-                throw new Error(errorData.detail); 
+                throw new Error(errorData.detail);
             });
         }
-        return response.json();  
+        return response.json();
     })
     .then(data => {
         if (data.error) {
@@ -189,11 +268,11 @@ function runCode() {
             } else if (msg.message.type == 'on_test_case_ide2') {
                 ws.close();
                 const resultData = msg.message.result;
-            
+
                 if (resultData.name === 'test-case-status' && resultData.cases && resultData.cases.length > 0) {
                     const testCase = resultData.cases[0]; // Lấy case đầu tiên
-            
-                    terminal.value = testCase.output || "";            
+
+                    terminal.value = testCase.output || "";
                     terminal.value += `\nElapsed Time: ${testCase.time}s`;
                     terminal.value += `\nMemory Usage: ${testCase.memory} KB`;
                 } else {
@@ -214,7 +293,7 @@ function runCode() {
         };
     })
     .catch(error => {
-        terminal.value = "Error: " + error.message;  
+        terminal.value = "Error: " + error.message;
     });
 }
 
@@ -231,7 +310,7 @@ function formatCompileLog(log) {
 }
 
 function submitProblem() {
-    let sourceCode = editor.getValue(); 
+    let sourceCode = editor.getValue();
     var selectedLang = document.getElementById("language").value;
 
     var languageMap = {
@@ -266,7 +345,7 @@ function submitProblem() {
     var submitPath = currentPath + 'submit';
     document.getElementById("ide_submit_form").action = submitPath;
     const form = document.getElementById("ide_submit_form");
-    form.submit(); 
+    form.submit();
 }
 
 function overrideJoinConfirm() {
