@@ -761,7 +761,7 @@ class ContestForm(ModelForm):
         widget=Select2Widget(),
         help_text=_('Select the organization participating in the exam.'),
     )
-
+    
     def __init__(self, *args, **kwargs):
         self.org_pk = org_pk = kwargs.pop('org_pk', None)
         self.user = kwargs.pop('user', None)
@@ -787,12 +787,7 @@ class ContestForm(ModelForm):
                 self.fields['is_exam'].initial = True
                 self.fields['exam_organization'].initial = access_qs.first().organization_id
 
-        self.fields['exam_organization'].queryset = (
-            self.user.profile.organizations.all()
-            if self.user and hasattr(self.user, 'profile')
-            else Organization.objects.none()
-        ) 
-
+        self.fields['exam_organization'].queryset = Organization.objects.filter(is_unlisted=False)
         if not self.data.get('is_exam') and not (self.instance and self.instance.pk and getattr(self.instance, 'is_exam', False)):
             self.fields['exam_organization'].widget.attrs['disabled'] = 'disabled'
 
