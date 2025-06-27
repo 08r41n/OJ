@@ -244,7 +244,10 @@ function runCode() {
         }
 
         const channel = data.channel;
-        const ws = new WebSocket("ws://127.0.0.1:15100/");
+        const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+        const wsHost = window.location.hostname;
+        const wsPort = 15100;
+        const ws = new WebSocket(`${wsProtocol}://${wsHost}:${wsPort}/`);
 
         ws.onopen = () => {
             ws.send(JSON.stringify({
