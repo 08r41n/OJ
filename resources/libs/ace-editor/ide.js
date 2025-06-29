@@ -124,50 +124,40 @@ function showIde(){
     const langSelect = document.querySelector('#language');
     const toggledEl = document.querySelector('#allowed-langs .toggled');
     if (!toggledEl) {
-        disableEditorAndLangs(langSelect);
         console.warn('[showIde] allowed-langs not found');
-        return;
-    }
-
-    const allowedLangsRaw = Array.from(toggledEl.childNodes)
-        .filter(node => node.nodeType === Node.TEXT_NODE || (node.tagName !== 'S'))
-        .map(node => node.textContent.trim().toLowerCase())
-        .flatMap(text => text.split(','))
-        .map(lang => lang.trim())
-        .filter(lang => lang);
-      const allowedLangs = allowedLangsRaw
-        .map(name => langMap[name])
-        .filter(Boolean);
-
-    if (!langSelect) {
-        console.warn('[showIde] #language select not found');
-        return;
-    }
-
-    let foundAny = false;
-    Array.from(langSelect.options).forEach(option => {
-        const isAllowed = allowedLangs.includes(option.value);
-        option.style.display = isAllowed ? '' : 'none';
-        if (isAllowed) foundAny = true;
-    });
-
-    if (!foundAny) {
-        disableEditorAndLangs(langSelect);
-        console.warn('[showIde] No valid languages allowed!');
     } else {
-        const selected = langSelect.options[langSelect.selectedIndex];
-        if (!selected || selected.style.display === 'none') {
-            const firstVisible = Array.from(langSelect.options).find(o => o.style.display !== 'none');
-            if (firstVisible) {
-                // Bỏ selected cũ
-                Array.from(langSelect.options).forEach(o => o.selected = false);
-                firstVisible.selected = true;
+        const allowedLangsRaw = Array.from(toggledEl.childNodes)
+            .filter(node => node.nodeType === Node.TEXT_NODE || (node.tagName !== 'S'))
+            .map(node => node.textContent.trim().toLowerCase())
+            .flatMap(text => text.split(','))
+            .map(lang => lang.trim())
+            .filter(lang => lang);
 
-                // Cập nhật selectedIndex
-                langSelect.selectedIndex = Array.from(langSelect.options).indexOf(firstVisible);
+        const allowedLangs = allowedLangsRaw
+            .map(name => langMap[name])
+            .filter(Boolean);
+
+        let foundAny = false;
+        Array.from(langSelect.options).forEach(option => {
+            const isAllowed = allowedLangs.includes(option.value);
+            option.style.display = isAllowed ? '' : 'none';
+            if (isAllowed) foundAny = true;
+        });
+
+        if (!foundAny) {
+            disableEditorAndLangs(langSelect);
+            console.warn('[showIde] No valid languages allowed!');
+        } else {
+            const selected = langSelect.options[langSelect.selectedIndex];
+            if (!selected || selected.style.display === 'none') {
+                const firstVisible = Array.from(langSelect.options).find(o => o.style.display !== 'none');
+                if (firstVisible) {
+                    Array.from(langSelect.options).forEach(o => o.selected = false);
+                    firstVisible.selected = true;
+                    langSelect.selectedIndex = Array.from(langSelect.options).indexOf(firstVisible);
+                }
             }
         }
-
     }
     let selectedLanguageEditor = document.getElementById("language").value;
     editor.setValue(languageCodeSamples[selectedLanguageEditor]);
