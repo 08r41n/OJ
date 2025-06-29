@@ -404,13 +404,6 @@ class CreateOrganization(PermissionRequiredMixin, TitleMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         if self.has_permission():
-            if self.request.user.profile.admin_of.count() >= settings.VNOJ_ORGANIZATION_ADMIN_LIMIT and \
-               not self.request.user.has_perm('spam_organization'):
-                return render(request, 'organization/create-limit-error.html', {
-                    'admin_of': self.request.user.profile.admin_of.all(),
-                    'admin_limit': settings.VNOJ_ORGANIZATION_ADMIN_LIMIT,
-                    'title': _("Can't create organization"),
-                }, status=403)
             return super(CreateOrganization, self).dispatch(request, *args, **kwargs)
         else:
             return generic_message(request, _("Can't create organization"),
