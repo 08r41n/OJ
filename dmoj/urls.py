@@ -177,6 +177,7 @@ urlpatterns = [
     path('submissions/', paged_list_view(submission.AllSubmissions, 'all_submissions')),
     path('submissions/diff', submission.SubmissionSourceDiff, name='diff_submissions'),
     path('submissions/user/<str:user>/', paged_list_view(submission.AllUserSubmissions, 'all_user_submissions')),
+    path('submission/delete/', submission.delete_submission, name='delete_submission'),
 
     path('src/<int:submission>', submission.SubmissionSource.as_view(), name='submission_source'),
     path('src/<int:submission>/raw', submission.SubmissionSourceRaw.as_view(), name='submission_source_raw'),
@@ -302,7 +303,7 @@ urlpatterns = [
              paged_list_view(organization.SubmissionListOrganization, 'submission_list_organization')),
         path('/problem-create', organization.ProblemCreateOrganization.as_view(), name='problem_create_organization'),
         path('/contest-create', organization.ContestCreateOrganization.as_view(), name='contest_create_organization'),
-
+        
         path('/request', organization.RequestJoinOrganization.as_view(), name='request_organization'),
         path('/request/<int:rpk>', organization.OrganizationRequestDetail.as_view(),
              name='request_organization_detail'),

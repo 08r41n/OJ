@@ -836,3 +836,12 @@ class UserContestSubmissions(ForceContestMixin, UserProblemSubmissions):
             contest=format_html('<a href="{1}">{0}</a>', self.contest.name,
                                 reverse('contest_view', args=[self.contest.key])),
         ))
+
+@login_required
+def delete_submission(request):
+    submission_id = request.POST.get('id')
+    if not submission_id or not submission_id.isdigit():
+        return JsonResponse({'error': 'Invalid submission ID.'}, status=400)
+    submission = get_object_or_404(Submission, id=submission_id)
+    submission.delete()
+    return JsonResponse({'success': True, 'message': 'Submission deleted successfully.'})
