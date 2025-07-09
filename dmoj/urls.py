@@ -303,7 +303,8 @@ urlpatterns = [
              paged_list_view(organization.SubmissionListOrganization, 'submission_list_organization')),
         path('/problem-create', organization.ProblemCreateOrganization.as_view(), name='problem_create_organization'),
         path('/contest-create', organization.ContestCreateOrganization.as_view(), name='contest_create_organization'),
-        
+        path('/contest-clone', organization.ContestCloneOrganization.as_view(), name='contest_clone_organization'),
+
         path('/request', organization.RequestJoinOrganization.as_view(), name='request_organization'),
         path('/request/<int:rpk>', organization.OrganizationRequestDetail.as_view(),
              name='request_organization_detail'),

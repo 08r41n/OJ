@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext as _, gettext_lazy, ngettext
+from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DetailView, FormView, ListView, UpdateView, View
 from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
 from reversion import revisions
@@ -737,3 +738,52 @@ class ContestCreateOrganization(AdminOrganizationMixin, CreateContest):
         self.object.is_organization_private = True
         self.object.organizations.add(self.organization)
         self.object.save()
+
+
+class CloneContestForm(forms.Form):
+    contests = forms.ModelMultipleChoiceField(
+        queryset=Contest.objects.none(),
+        widget=forms.SelectMultiple,
+        label='Contests to Clone'
+    )
+    target_organizations = forms.ModelMultipleChoiceField(
+        queryset=Organization.objects.none(),
+        widget=forms.SelectMultiple,
+        label='Target Organizations'
+    )
+
+    def __init__(self, *args, **kwargs):
+        source_org = kwargs.pop('source_org')
+        user_profile = kwargs.pop('user_profile')
+        super().__init__(*args, **kwargs)
+
+        self.fields['contests'].queryset = Contest.objects.filter(organizations=source_org)
+        self.fields['target_organizations'].queryset = user_profile.admin_of.exclude(id=source_org.id)
+
+class ContestCloneOrganization(AdminOrganizationMixin, LoginRequiredMixin, FormView):
+    template_name = 'organization/clone-contest.html'
+    form_class = CloneContestForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['source_org'] = self.organization
+        kwargs['user_profile'] = self.request.profile
+        return kwargs
+
+    def form_valid(self, form):
+        contests = form.cleaned_data['contests']
+        target_orgs = form.cleaned_data['target_organizations']
+
+        for contest in contests:
+            for target_org in target_orgs:
+                # Clone basic contest info
+                cloned = Contest.objects.get(pk=contest.pk)
+                cloned.pk = None
+                cloned.title += ' (Clone)'
+                cloned.key = f"{target_org.slug.lower().replace('-', '')}_{contest.key}"
+                cloned.is_organization_private = True
+                cloned.save()
+                cloned.authors.set(contest.authors.all())
+                cloned.organizations.set([target_org])
+
+        return redirect(reverse('contest_list_organization', args=[self.organization.slug]))

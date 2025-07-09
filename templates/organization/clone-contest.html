@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Clone contest from {{ organization.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="id_contests">Select contests to clone:</label>
+    {{ form.contests }}
+    <br><br>
+    <label for="id_target_organizations">Select destination organizations:</label>
+    {{ form.target_organizations }}
+    <br><br>
+    <button type="submit">Clone Selected Contests</button>
+</form>
+{% endblock %}
