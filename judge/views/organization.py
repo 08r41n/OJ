@@ -739,17 +739,21 @@ class ContestCreateOrganization(AdminOrganizationMixin, CreateContest):
         self.object.organizations.add(self.organization)
         self.object.save()
 
-
 class CloneContestForm(forms.Form):
     contests = forms.ModelMultipleChoiceField(
         queryset=Contest.objects.none(),
+        required=True,
         widget=forms.SelectMultiple,
-        label='Contests to Clone'
+        label='Contests to Clone',
+        help_text=_('Select contests from the current organization to clone to other organizations.'),
+
     )
     target_organizations = forms.ModelMultipleChoiceField(
         queryset=Organization.objects.none(),
+        required=True,
         widget=forms.SelectMultiple,
-        label='Target Organizations'
+        label='Target Organizations',
+        help_text=_('Select organizations to receive the cloned contests.'),
     )
 
     def __init__(self, *args, **kwargs):
@@ -758,12 +762,22 @@ class CloneContestForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields['contests'].queryset = Contest.objects.filter(organizations=source_org)
-        self.fields['target_organizations'].queryset = user_profile.admin_of.exclude(id=source_org.id)
+        if user_profile.user.is_superuser:
+            self.fields['target_organizations'].queryset = Organization.objects.exclude(id=source_org.id)
+        else:
+            self.fields['target_organizations'].queryset = user_profile.admin_of.exclude(id=source_org.id)
 
-class ContestCloneOrganization(AdminOrganizationMixin, LoginRequiredMixin, FormView):
+class ContestCloneOrganization(LoginRequiredMixin, TitleMixin, AdminOrganizationMixin, FormView):
     template_name = 'organization/clone-contest.html'
     form_class = CloneContestForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        org_name = self.organization.name  
+        context['title'] = f"Clone contest from {org_name}"
+        context['content_title'] = f"Clone contest from {org_name}"
+        return context
+        
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['source_org'] = self.organization
@@ -775,15 +789,30 @@ class ContestCloneOrganization(AdminOrganizationMixin, LoginRequiredMixin, FormV
         target_orgs = form.cleaned_data['target_organizations']
 
         for contest in contests:
-            for target_org in target_orgs:
-                # Clone basic contest info
-                cloned = Contest.objects.get(pk=contest.pk)
-                cloned.pk = None
-                cloned.title += ' (Clone)'
-                cloned.key = f"{target_org.slug.lower().replace('-', '')}_{contest.key}"
-                cloned.is_organization_private = True
-                cloned.save()
-                cloned.authors.set(contest.authors.all())
-                cloned.organizations.set([target_org])
+            try:
+                suffix = contest.key.split('_')[-1] if '_' in contest.key else contest.key
+                for target_org in target_orgs:
+                    new_key = f"{target_org.slug.lower()}_{suffix}_{suffix}"
+                    cloned = copy.copy(contest)  
+                    cloned.pk = None
+                    cloned.key = new_key
 
-        return redirect(reverse('contest_list_organization', args=[self.organization.slug]))
+                    with revisions.create_revision(atomic=True):
+                        cloned.save()
+                        cloned.tags.set(contest.tags.all())
+                        cloned.organizations.set([target_org])
+                        cloned.private_contestants.set(contest.private_contestants.all())
+                        cloned.view_contest_scoreboard.set(contest.view_contest_scoreboard.all())
+                        cloned.authors.add(self.request.profile)
+
+                        problems = list(contest.contest_problems.all())
+                        for problem in problems:
+                            problem.pk = None
+                            problem.contest = cloned
+                        ContestProblem.objects.bulk_create(problems)
+
+                        revisions.set_user(self.request.user)
+                        revisions.set_comment(f"Cloned contest from {contest.key}")
+            except Exception as e:
+                logger.exception(f"❌ Error while cloning contest {contest.key}: {str(e)}")
+        return redirect(reverse('organization_home', args=[self.organization.slug]))

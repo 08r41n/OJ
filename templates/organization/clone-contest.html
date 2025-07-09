@@ -1,14 +1,56 @@
 {% extends "base.html" %}
-{% block content %}
-<h2>Clone contest from {{ organization.name }}</h2>
-<form method="post">
-    {% csrf_token %}
-    <label for="id_contests">Select contests to clone:</label>
-    {{ form.contests }}
-    <br><br>
-    <label for="id_target_organizations">Select destination organizations:</label>
-    {{ form.target_organizations }}
-    <br><br>
-    <button type="submit">Clone Selected Contests</button>
-</form>
+{% block js_media %}
+    {% include "leave-warning.html" %}
+    <script src="/static/vnoj/flatpickr/flatpickr.js"></script>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", function () {
+            flatpickr(".datetimefield", {
+                enableTime: true,
+                enableSeconds: true,
+                dateFormat: "Y-m-d H:i:S",
+                time_24hr: true,
+            });
+
+            // Enable select2 on contest & target org fields
+            $('#id_contests').select2({
+                placeholder: "Select contests to clone",
+                width: '100%',
+            });
+
+            $('#id_target_organizations').select2({
+                placeholder: "Select target organizations",
+                width: '100%',
+            });
+        });
+    </script>
+    {{ form.media.js }}
+{% endblock %}
+
+{% block media %}
+    <link rel="stylesheet" href="/static/vnoj/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ static('ui_form.css') }}">
+    {{ form.media.css }}
+    <style>
+      .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #1ba94c;
+        color: white;
+      }
+      .django-as-table th {
+        max-width: 12em !important;
+        width: 12em;
+      }
+    </style>
+{% endblock %}
+
+{% block body %}
+ <form action="" method="post" class="form-area" style="display: flex; justify-content: center; flex-direction: column; padding-top: 6px;">
+        {% csrf_token %}
+        <table class="django-as-table">
+            {{ form.as_table() }}
+        </table>
+        <div style="display: flex; justify-content: flex-end;"><button class="submit-bar" type="submit">
+            {{ _('Clone') }}
+        </button></div>
+    </form>
 {% endblock %}
