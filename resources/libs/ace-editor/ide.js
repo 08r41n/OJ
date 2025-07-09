@@ -202,6 +202,7 @@ function hideIde(){
 function runCode() {
     let code = editor.getValue();
     let inputText = input.value;
+    let submissionId = 'none';
     const select = document.getElementById('language');
     const languageSelectedText = select.options[select.selectedIndex].text.toUpperCase();
     terminal.value = "Running code...\n";
@@ -234,6 +235,7 @@ function runCode() {
         }
 
         const channel = data.channel;
+        submissionId = data.submission_id;
         const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
         const wsHost = window.location.hostname;
         const wsPort = 15100;
@@ -257,6 +259,7 @@ function runCode() {
                 if (resultData.error) terminal.value += "\nError: " + resultData.error;
                 terminal.value += `\nElapsed Time: ${resultData.execution_time}s`;
                 terminal.value += `\nMemory Usage: ${resultData.max_memory} KB`;
+                deleteSubmission(submissionId);
                 document.querySelector('.ace_wrapper .submit-btn').classList.remove('blur-disabled');
             } else if (msg.message.type == 'on_test_case_ide2') {
                 ws.close();
@@ -271,12 +274,14 @@ function runCode() {
                 } else {
                     terminal.value = "Compile Error!";
                 }
+                deleteSubmission(submissionId);
                 document.querySelector('.ace_wrapper .submit-btn').classList.remove('blur-disabled');
 
             } else if (msg.message.type == 'ide-compile-error') {
                 ws.close();
                 const compileLog = msg.message.msg?.log || "Unknown Compile Error!";
                 terminal.value = "Compile Error:\n" + decodeAnsi(compileLog);
+                deleteSubmission(submissionId);
                 document.querySelector('.ace_wrapper .submit-btn').classList.remove('blur-disabled');
             }
         };
@@ -288,6 +293,33 @@ function runCode() {
     .catch(error => {
         terminal.value = "Error: " + error.message;
     });
+}
+
+function deleteSubmission(submissionId) {
+    fetch("/submission/delete/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCsrfToken()
+        },
+        body: `id=${submissionId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            return;
+        } else {
+            console.warn(`⚠️ Failed to delete submission ${submissionId}:`, data.error || data.message);
+        }
+    })
+    .catch(error => {
+        console.error(`❌ Error deleting submission ${submissionId}:`, error);
+    });
+}
+
+function getCsrfToken() {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : '';
 }
 
 function decodeAnsi(str) {
