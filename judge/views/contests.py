@@ -53,6 +53,7 @@ from judge.utils.stats import get_bar_chart, get_pie_chart, get_stacked_bar_char
 from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, SingleObjectFormView, TitleMixin, \
     add_file_response, generic_message
 from judge.views.register import RegistrationForm
+from judge.tasks.contest import schedule_auto_export
 
 __all__ = ['ContestList', 'ContestDetail', 'ContestRanking', 'ContestJoin', 'ContestLeave', 'ContestCalendar',
            'ContestClone', 'ContestStats', 'ContestMossView', 'ContestMossDelete',
@@ -1356,6 +1357,7 @@ class CreateContest(PermissionRequiredMixin, TitleMixin, CreateView):
         post_data = request.POST.copy()
         is_exam = post_data.pop('is_exam', False)
         organization_id = post_data.pop('exam_organization', [None])[0]
+        auto_export = post_data.pop('auto_export', False)
         form = ContestForm(post_data, instance=self.object)
         form_set = self.get_contest_problem_formset()
 
@@ -1368,6 +1370,10 @@ class CreateContest(PermissionRequiredMixin, TitleMixin, CreateView):
                 revisions.set_comment(_('Created on site'))
                 revisions.set_user(self.request.user)
             on_new_contest.delay(self.object.key)
+
+            if auto_export:
+                schedule_auto_export.delay(self.object.id)
+
             if organization_id and is_exam:
                 try:
                     organization = Organization.objects.get(pk=organization_id)
