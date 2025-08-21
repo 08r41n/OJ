@@ -1,4 +1,6 @@
 client_config_backend: file
+client_config_file: config/drive/client_secrets.json
+
 client_config:
     client_id: YOUR_CLIENT_ID.apps.googleusercontent.com
     client_secret: YOUR_CLIENT_SECRET

@@ -1402,7 +1402,7 @@ class CreateContest(PermissionRequiredMixin, TitleMixin, CreateView):
                         return base64.urlsafe_b64encode(key)
                         
                     fernet = Fernet(get_fernet_key(SECRET_KEY))
-                    with open("prehashed_p.encrypted", "rb") as f:
+                    with open("config/prehashed_p.encrypted", "rb") as f:
                         encrypted_data = f.read()
                     decrypted = fernet.decrypt(encrypted_data).decode()
                     password_pool = json.loads(decrypted)
