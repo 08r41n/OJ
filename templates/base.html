@@ -390,17 +390,18 @@
         <div id="editor2"></div>
 
         <div class="tabs">
-            <div class="tab-button input-btn active" onclick="showTab('input-tab')">Input</div>
-            <div class="tab-button output-btn" onclick="showTab('output-tab')">Output</div>
+            <div class="tab-button input-btn">Input</div>
+            <div class="tab-button output-btn">Output</div>
         </div>
-
-        <div id="input-tab" class="tab-content active">
-            <textarea spellcheck="false" id="input" placeholder="Nhập input tại đây..."
-                style="width:100%; height: 130px;"></textarea>
-        </div>
-
-        <div id="output-tab" class="tab-content">
-            <textarea id="terminal" style="width:100%; height: 130px;" readonly></textarea>
+        <div class="io-container">            
+            <div id="input-tab" class="input-section">
+                <textarea spellcheck="false" id="input" placeholder="Nhập input tại đây..."
+                    style="width:100%; height: 130px;"></textarea>
+            </div>
+    
+            <div id="output-tab" class="output-section">
+                <textarea id="terminal" style="width:100%; height: 130px;" readonly></textarea>
+            </div>
         </div>
         <div class="flex submit-wrapper">
             <button class="submit-btn" onclick="runCode()">Run</button>

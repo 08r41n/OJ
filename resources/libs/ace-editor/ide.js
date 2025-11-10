@@ -204,9 +204,9 @@ function runCode() {
     let inputText = input.value;
     let submissionId = 'none';
     const select = document.getElementById('language');
-    const languageSelectedText = select.options[select.selectedIndex].text.toUpperCase();
+    let languageSelectedText = select.options[select.selectedIndex].text.toUpperCase();
     terminal.value = "Running code...\n";
-    showTab('output-tab');
+    // showTab('output-tab');
     document.querySelector('.ace_wrapper .submit-btn').classList.add('blur-disabled');
 
     fetch("/problem/run_code", {
@@ -340,7 +340,7 @@ function submitProblem() {
 
     var languageMap = {
         "c": 5,
-        "cpp": 14,
+        "cpp": 4,
         "java": 18,
         "kotlin": 15,
         "pascal": 7,
