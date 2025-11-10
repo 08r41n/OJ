@@ -205,6 +205,11 @@ function runCode() {
     let submissionId = 'none';
     const select = document.getElementById('language');
     let languageSelectedText = select.options[select.selectedIndex].text.toUpperCase();
+    if(languageSelectedText == "C"){
+        languageSelectedText = "CICPC";
+    } else if(languageSelectedText == "CPP20"){
+        languageSelectedText = "CPPICPC";
+    }
     terminal.value = "Running code...\n";
     // showTab('output-tab');
     document.querySelector('.ace_wrapper .submit-btn').classList.add('blur-disabled');
